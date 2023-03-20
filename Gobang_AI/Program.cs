@@ -5,7 +5,9 @@
         static void Main(string[] args)
         {
             Console.WriteLine("StarWing 2023.3.16");
-            Console.WriteLine();
+            /*DateTime dateTime = DateTime.Now;
+            Console.WriteLine(dateTime.Second);*/
+            Console.WriteLine();       
             GameTest();
         }
 
@@ -21,7 +23,7 @@
             {
                 if (isAI)
                 {
-                    int k = game.MinMax(isAI);
+                    int k = game.MinMaxSearch(isAI);
                     nextStep = game.GetNextStep();
                     Console.WriteLine("AI: ({0}, {1})", nextStep.Item1 + 1, nextStep.Item2 + 1);
                     //Console.WriteLine(k);

@@ -10,12 +10,13 @@ namespace GameTree
     public class GameTree
     {
         //棋盘高度
-        const int high = 10;
+        const int high = 9;
         //棋盘宽度
-        const int length = 10;
+        const int length = 9;
         
         //搜索深度
         const int DEPTH = 3;
+
 
         //棋盘
         private int[,] Map = new int[high, length];
@@ -106,7 +107,7 @@ namespace GameTree
         }
 
         //极大极小值搜索
-        public int MinMax(bool isAI)
+        public int MinMaxSearch(bool isAI)
         {
             if (isAI)
             {
@@ -115,6 +116,21 @@ namespace GameTree
             else
             {
                 return Min(DEPTH);
+            }
+        }
+
+        //alpha-beta剪枝搜索
+        public int AlphaBetaSearch(bool isAI)
+        {
+            int alpha = int.MinValue;
+            int beta = int.MaxValue;
+            if (isAI)
+            {
+                return Max(DEPTH, alpha, beta);
+            }
+            else
+            {
+                return Min(DEPTH, alpha, beta);
             }
         }
 
@@ -141,6 +157,7 @@ namespace GameTree
                     }
                 }
 
+
                 if (depth == DEPTH)
                 {
                     Console.WriteLine("value:{0} , step:({1},{2}) ||| best:{3} , best_step:({4},{5})", value, nextPositionList[i].Item1 + 1, nextPositionList[i].Item2 + 1, best, NextStep.Item1 + 1, NextStep.Item2 + 1);
@@ -154,6 +171,7 @@ namespace GameTree
                             Console.WriteLine("best:{0}",best);
                             Console.WriteLine(NextStep);
                         }*/
+            
             return best;
 
         }
@@ -596,6 +614,76 @@ namespace GameTree
                 Console.WriteLine();
             }
             Console.WriteLine();
+        }
+
+
+        //极大值搜索(alpha剪枝)
+        private int Max(int depth, int alpha, int beta)
+        {
+            if (depth <= 0 || GameOver() > 0)
+            {
+                return Evaluate();
+            }
+            List<Tuple<int, int>> nextPositionList = NextMovePosition();
+            for (int i = 0; i < nextPositionList.Count; i++)
+            {
+                MakeNextMove(nextPositionList[i], true);
+                int alpha1 = Min(depth - 1);
+                UnmakeMove(nextPositionList[i]);
+                if (alpha1 >= alpha)
+                {
+                    alpha = alpha1;
+                    if (depth == DEPTH)
+                    {
+                        NextStep = nextPositionList[i];
+                    }
+                }
+                if (alpha >= beta)
+                {
+                    return alpha;
+                }
+
+                if (depth == DEPTH)
+                {
+                    Console.WriteLine("value:{0} , step:({1},{2}) ||| best:{3} , best_step:({4},{5})", alpha1, nextPositionList[i].Item1 + 1, nextPositionList[i].Item2 + 1, alpha, NextStep.Item1 + 1, NextStep.Item2 + 1);
+
+                }
+
+            }
+
+            /*            if (depth == 10)
+                        {
+                            Console.WriteLine("best:{0}",best);
+                            Console.WriteLine(NextStep);
+                        }*/
+
+            return alpha;
+
+        }
+
+        //极小值搜索(beta剪枝)
+        private int Min(int depth, int alpha, int beta)
+        {
+            if (depth <= 0 || GameOver() > 0)
+            {
+                return Evaluate();
+            }
+            List<Tuple<int, int>> nextPositionList = NextMovePosition();
+            for (int i = 0; i < nextPositionList.Count; i++)
+            {
+                MakeNextMove(nextPositionList[i], false);
+                int beta1 = Max(depth - 1);
+                UnmakeMove(nextPositionList[i]);
+                if (beta <= beta1)
+                {
+                    beta = beta1;
+                }
+                if (alpha >= beta)
+                {
+                    return beta;
+                }
+            }
+            return beta;
         }
 
     }
