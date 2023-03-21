@@ -11,14 +11,19 @@ namespace GameTree
     public class GameTree
     {
         //棋盘高度
-        const int high = 15;
+        const int high = 10;
         //棋盘宽度
-        const int length = 15;
+        const int length = 10;
         
         //搜索深度
         const int DEPTH = 3;
 
-        int n = 0;
+        int skip_num = 0;
+        int pruning_num = 0;
+        int search_num = 0;
+        int cut_search_num = 0;
+        int alpha = int.MinValue;
+        int beta = int.MaxValue;
 
         //棋盘
         private int[,] Map = new int[high, length];
@@ -100,6 +105,8 @@ namespace GameTree
                     Map[i, j] = 0;
                 }
             }
+            
+            
         }
 
         //获取下一步行动(无逻辑处理)
@@ -111,7 +118,7 @@ namespace GameTree
         //极大极小值搜索
         public int MinMaxSearch(bool isAI)
         {
-            n = 0;
+            pruning_num = 0;
             if (isAI)
             {
                 return Max(DEPTH);
@@ -122,12 +129,48 @@ namespace GameTree
             }          
         }
 
+        //alpha-beta剪枝搜索(封装, 记录信息并返回下一步)
+        public Tuple<int, int> AlphaBetaSearch()
+        {
+
+            Console.WriteLine("搜索深度: {0}", DEPTH);
+            Console.WriteLine("high: {0}, length: {1}", high, length);
+            Console.WriteLine("初始化逻辑棋盘...");
+            PrintMap();
+
+
+            search_num = 0;
+            pruning_num = 0;
+            cut_search_num = 0;
+            alpha = int.MinValue;
+            beta = int.MaxValue;
+            Console.WriteLine("开始计算...");
+            TimeSpan ts1 = DateTime.Now - new DateTime(1970, 1, 1, 0, 0, 0, 0);
+            AlphaBetaSearch(true);
+            TimeSpan ts2 = DateTime.Now - new DateTime(1970, 1, 1, 0, 0, 0, 0);
+            PrintMap();
+
+            Console.WriteLine("计算时间: {0}", ts2-ts1);
+            Console.WriteLine("搜索次数: {0}", search_num);
+            Console.WriteLine("跳过搜索的格子数目: {0}", skip_num);
+            Console.WriteLine("剪枝次数: {0}", pruning_num);
+            Console.WriteLine("剪枝优化掉的搜索次数: {0}", cut_search_num);      
+            Console.WriteLine("AI: ({0}, {1})", NextStep.Item1, NextStep.Item2);
+
+            search_num = 0;
+            pruning_num = 0;
+            cut_search_num = 0;
+            alpha = int.MinValue;
+            beta = int.MaxValue;
+
+            return NextStep;
+        }
+
         //alpha-beta剪枝搜索
         public int AlphaBetaSearch(bool isAI)
         {
-            n = 0;
-            int alpha = int.MinValue;
-            int beta = int.MaxValue;
+
+            
             if (isAI)
             {
                 return Max(DEPTH, alpha, beta);
@@ -171,11 +214,6 @@ namespace GameTree
 
             }
 
-            if (depth == DEPTH)
-            {
-                Console.WriteLine(n);
-            }
-
             return best;
 
         }
@@ -200,6 +238,107 @@ namespace GameTree
                 }
             }
             return best;
+        }
+
+        //极大值搜索(alpha剪枝)
+        private int Max(int depth, int alpha, int beta)
+        {
+            search_num++;
+            int v = GameOver();
+            if (depth <= 0)
+            {
+                return Evaluate();
+            }
+            if (v == 1)
+            {
+                return int.MaxValue;
+            }
+            if (v == 2)
+            {
+                return int.MinValue;
+            }
+            List<Tuple<int, int>> nextPositionList = NextMovePosition();
+            for (int i = 0; i < nextPositionList.Count; i++)
+            {
+
+                if (!CheckRound(nextPositionList[i]))
+                {
+                    skip_num++;
+                    continue;
+                }
+
+                MakeNextMove(nextPositionList[i], true);
+                int value = Min(depth - 1, alpha, beta);
+                UnmakeMove(nextPositionList[i]);
+                if (value > alpha)
+                {
+
+                    alpha = value;
+                    if (depth == DEPTH)
+                    {
+                        NextStep = nextPositionList[i];
+                    }
+                    if (alpha >= beta)
+                    {
+                        pruning_num++;
+                        cut_search_num = cut_search_num + (nextPositionList.Count - i)*Convert.ToInt32(Math.Pow(nextPositionList.Count, depth-1));
+                        return alpha; 
+                    }
+                }
+
+                if (depth == DEPTH)
+                {
+
+                    Console.WriteLine("value:{0} , step:({1},{2}) ||| alpha:{3} , beta: {4} , best_step:({5},{6})", value, nextPositionList[i].Item1 + 1, nextPositionList[i].Item2 + 1, alpha, beta, NextStep.Item1 + 1, NextStep.Item2 + 1);
+
+                }
+            }
+
+            return alpha;
+
+        }
+
+        //极小值搜索(beta剪枝)
+        private int Min(int depth, int alpha, int beta)
+        {
+            search_num++;
+            int v = GameOver();
+            if (depth <= 0)
+            {
+                return Evaluate();
+            }
+            if(v == 1)
+            {
+                return int.MaxValue;
+            }
+            if(v == 2)
+            {
+                return int.MinValue;
+            }
+            List<Tuple<int, int>> nextPositionList = NextMovePosition();
+            for (int i = 0; i < nextPositionList.Count; i++)
+            {
+                if (!CheckRound(nextPositionList[i]))
+                {
+                    skip_num++;
+                    continue;
+                }
+
+                MakeNextMove(nextPositionList[i], false);
+                int value = Max(depth - 1, alpha, beta);
+                UnmakeMove(nextPositionList[i]);
+                if (value < beta)
+                {
+                    beta = value;
+                    if (alpha >= beta)
+                    {
+                        pruning_num++;
+                        cut_search_num = cut_search_num + (nextPositionList.Count - i) * Convert.ToInt32(Math.Pow(nextPositionList.Count, depth - 1));
+                        return beta;
+                    }
+                }
+            }
+            return beta;
         }
 
         //评估函数
@@ -621,85 +760,7 @@ namespace GameTree
         }
 
 
-        //极大值搜索(alpha剪枝)
-        private int Max(int depth, int alpha, int beta)
-        {
-            if (depth <= 0 || GameOver() > 0)
-            {
-                return Evaluate();
-            }
-            List<Tuple<int, int>> nextPositionList = NextMovePosition();
-            for (int i = 0; i < nextPositionList.Count; i++)
-            {
 
-                if (!CheckRound(nextPositionList[i]))
-                {
-                    continue;
-                }
-
-                MakeNextMove(nextPositionList[i], true);
-                int value = Min(depth - 1, alpha, beta);
-                UnmakeMove(nextPositionList[i]);
-                if (value > alpha)
-                {
-                    
-                    alpha = value;
-                    if (depth == DEPTH)
-                    {
-                        NextStep = nextPositionList[i];
-                    }
-                    if (alpha >= beta)
-                    {
-                        n++;
-                        return alpha;
-                    }                    
-                }
-                
-
-
-                if (depth == DEPTH)
-                {
-                    
-                    Console.WriteLine("value:{0} , step:({1},{2}) ||| best:{3} , best_step:({4},{5})", value, nextPositionList[i].Item1 + 1, nextPositionList[i].Item2 + 1, alpha, NextStep.Item1 + 1, NextStep.Item2 + 1);
-
-                }
-
-            }
-
-            if (depth == DEPTH)
-            {
-                Console.WriteLine(n);
-            }
-
-            return alpha;
-
-        }
-
-        //极小值搜索(beta剪枝)
-        private int Min(int depth, int alpha, int beta)
-        {
-            if (depth <= 0 || GameOver() > 0)
-            {
-                return Evaluate();
-            }
-            List<Tuple<int, int>> nextPositionList = NextMovePosition();
-            for (int i = 0; i < nextPositionList.Count; i++)
-            {
-                MakeNextMove(nextPositionList[i], false);
-                int value = Max(depth - 1, alpha, beta);
-                UnmakeMove(nextPositionList[i]);
-                if (value < beta)
-                {
-                    beta = value;
-                    if (alpha >= beta)
-                    {
-                        n++;
-                        return beta;
-                    }
-                }            
-            }
-            return beta;
-        }
 
         //判断周围是否有棋子
         private bool CheckRound(Tuple<int, int> position)
@@ -763,6 +824,7 @@ namespace GameTree
                 }
             }
 
+            
             return false;
 
         }

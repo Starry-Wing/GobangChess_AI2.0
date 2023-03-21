@@ -27,13 +27,12 @@ namespace Gobang_AI
                
                 if (isAI && k > 0)
                 {
-                    TimeSpan ts1 = DateTime.Now - new DateTime(1970, 1, 1, 0, 0, 0, 0);
-                    game.AlphaBetaSearch(isAI);
+                    //TimeSpan ts1 = DateTime.Now - new DateTime(1970, 1, 1, 0, 0, 0, 0);
+                    nextStep = game.AlphaBetaSearch();
                     //game.MinMaxSearch(isAI);
-                    TimeSpan ts2 = DateTime.Now - new DateTime(1970, 1, 1, 0, 0, 0, 0);
-                    nextStep = game.GetNextStep();
+                    //TimeSpan ts2 = DateTime.Now - new DateTime(1970, 1, 1, 0, 0, 0, 0);
                     Console.WriteLine("AI: ({0}, {1})", nextStep.Item1 + 1, nextStep.Item2 + 1);
-                    Console.WriteLine(ts2 - ts1);
+                    //Console.WriteLine(ts2 - ts1);
                 }else if (isAI && k == 0)
                 {
                     TimeSpan ts1 = DateTime.Now - new DateTime(1970, 1, 1, 0, 0, 0, 0);
@@ -54,7 +53,7 @@ namespace Gobang_AI
                     nextStep = new Tuple<int, int>(x - 1, y - 1);
                 }
                 game.MakeNextMove(nextStep, isAI);
-                game.PrintMap();
+                //game.PrintMap();
                 isAI = !isAI;
                 k++;
             }
