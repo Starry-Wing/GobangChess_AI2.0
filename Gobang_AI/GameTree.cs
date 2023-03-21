@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -10,13 +11,14 @@ namespace GameTree
     public class GameTree
     {
         //棋盘高度
-        const int high = 9;
+        const int high = 15;
         //棋盘宽度
-        const int length = 9;
+        const int length = 15;
         
         //搜索深度
         const int DEPTH = 3;
 
+        int n = 0;
 
         //棋盘
         private int[,] Map = new int[high, length];
@@ -109,6 +111,7 @@ namespace GameTree
         //极大极小值搜索
         public int MinMaxSearch(bool isAI)
         {
+            n = 0;
             if (isAI)
             {
                 return Max(DEPTH);
@@ -116,12 +119,13 @@ namespace GameTree
             else
             {
                 return Min(DEPTH);
-            }
+            }          
         }
 
         //alpha-beta剪枝搜索
         public int AlphaBetaSearch(bool isAI)
         {
+            n = 0;
             int alpha = int.MinValue;
             int beta = int.MaxValue;
             if (isAI)
@@ -145,6 +149,7 @@ namespace GameTree
             List<Tuple<int, int>> nextPositionList = NextMovePosition();
             for (int i = 0; i < nextPositionList.Count; i++)
             {
+                
                 MakeNextMove(nextPositionList[i], true);
                 int value = Min(depth - 1);
                 UnmakeMove(nextPositionList[i]);
@@ -166,12 +171,11 @@ namespace GameTree
 
             }
 
-            /*            if (depth == 10)
-                        {
-                            Console.WriteLine("best:{0}",best);
-                            Console.WriteLine(NextStep);
-                        }*/
-            
+            if (depth == DEPTH)
+            {
+                Console.WriteLine(n);
+            }
+
             return best;
 
         }
@@ -627,35 +631,45 @@ namespace GameTree
             List<Tuple<int, int>> nextPositionList = NextMovePosition();
             for (int i = 0; i < nextPositionList.Count; i++)
             {
-                MakeNextMove(nextPositionList[i], true);
-                int alpha1 = Min(depth - 1);
-                UnmakeMove(nextPositionList[i]);
-                if (alpha1 >= alpha)
+
+                if (!CheckRound(nextPositionList[i]))
                 {
-                    alpha = alpha1;
+                    continue;
+                }
+
+                MakeNextMove(nextPositionList[i], true);
+                int value = Min(depth - 1, alpha, beta);
+                UnmakeMove(nextPositionList[i]);
+                if (value > alpha)
+                {
+                    
+                    alpha = value;
                     if (depth == DEPTH)
                     {
                         NextStep = nextPositionList[i];
                     }
+                    if (alpha >= beta)
+                    {
+                        n++;
+                        return alpha;
+                    }                    
                 }
-                if (alpha >= beta)
-                {
-                    return alpha;
-                }
+                
+
 
                 if (depth == DEPTH)
                 {
-                    Console.WriteLine("value:{0} , step:({1},{2}) ||| best:{3} , best_step:({4},{5})", alpha1, nextPositionList[i].Item1 + 1, nextPositionList[i].Item2 + 1, alpha, NextStep.Item1 + 1, NextStep.Item2 + 1);
+                    
+                    Console.WriteLine("value:{0} , step:({1},{2}) ||| best:{3} , best_step:({4},{5})", value, nextPositionList[i].Item1 + 1, nextPositionList[i].Item2 + 1, alpha, NextStep.Item1 + 1, NextStep.Item2 + 1);
 
                 }
 
             }
 
-            /*            if (depth == 10)
-                        {
-                            Console.WriteLine("best:{0}",best);
-                            Console.WriteLine(NextStep);
-                        }*/
+            if (depth == DEPTH)
+            {
+                Console.WriteLine(n);
+            }
 
             return alpha;
 
@@ -672,18 +686,85 @@ namespace GameTree
             for (int i = 0; i < nextPositionList.Count; i++)
             {
                 MakeNextMove(nextPositionList[i], false);
-                int beta1 = Max(depth - 1);
+                int value = Max(depth - 1, alpha, beta);
                 UnmakeMove(nextPositionList[i]);
-                if (beta <= beta1)
+                if (value < beta)
                 {
-                    beta = beta1;
-                }
-                if (alpha >= beta)
-                {
-                    return beta;
-                }
+                    beta = value;
+                    if (alpha >= beta)
+                    {
+                        n++;
+                        return beta;
+                    }
+                }            
             }
             return beta;
+        }
+
+        //判断周围是否有棋子
+        private bool CheckRound(Tuple<int, int> position)
+        {
+            int x = position.Item1;
+            int y = position.Item2;
+            if (x + 1 < high)
+            {
+                if (Map[x+1, y] != 0)
+                {
+                    return true;
+                }
+            }
+            if (x - 1 >= 0)
+            {
+                if (Map[x - 1, y] != 0)
+                {
+                    return true;
+                }
+            }
+            if (y +1 < length)
+            {
+                if (Map[x, y+1] != 0)
+                {
+                    return true;
+                }
+            }
+            if (y - 1 >= 0)
+            {
+                if (Map[x, y - 1] != 0)
+                {
+                    return true;
+                }
+            }
+            if (x+1 < high && y + 1 < length)
+            {
+                if (Map[x+1, y + 1] != 0)
+                {
+                    return true;
+                }
+            }
+            if (x - 1 >=0 && y -1 >=0)
+            {
+                if (Map[x - 1, y - 1] != 0)
+                {
+                    return true;
+                }
+            }
+            if (x + 1 < high && y - 1 >= 0)
+            {
+                if (Map[x + 1, y - 1] != 0)
+                {
+                    return true;
+                }
+            }
+            if (x - 1 >= 0 && y + 1 < length)
+            {
+                if (Map[x - 1, y + 1] != 0)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+
         }
 
     }
