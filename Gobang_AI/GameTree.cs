@@ -40,7 +40,7 @@ namespace GameTree
             {new Tuple<int, int, int, int, int, int>(1, 1, 0, 1, 0, 0), 400 },
             {new Tuple<int, int, int, int, int, int>(0, 1, 1, 0, 1, 0), 800 },
             {new Tuple<int, int, int, int, int, int>(1, 1, 1, 0, 0, 0), 2000 },
-            {new Tuple<int, int, int, int, int, int>(0, 1, 1, 1, 0, 0), 3000 },
+            {new Tuple<int, int, int, int, int, int>(0, 1, 1, 1, 0, 0), 4000 },
             {new Tuple<int, int, int, int, int, int>(1, 1, 1, 0, 1, 0), 7000 },
             {new Tuple<int, int, int, int, int, int>(0, 1, 1, 1, 0, 1), 8000 },
             {new Tuple<int, int, int, int, int, int>(1, 1, 1, 1, 0, 0), 10000 },
@@ -52,11 +52,11 @@ namespace GameTree
             {new Tuple<int, int, int, int, int, int>(0, 2, 2, 0, 0, 0), -200 },
             {new Tuple<int, int, int, int, int, int>(2, 2, 0, 2, 0, 0), -500 },
             {new Tuple<int, int, int, int, int, int>(2, 2, 2, 0, 0, 0), -2000 },
-            {new Tuple<int, int, int, int, int, int>(0, 2, 2, 2, 0, 0), -3000 },
+            {new Tuple<int, int, int, int, int, int>(0, 2, 2, 2, 0, 0), -4000 },
             {new Tuple<int, int, int, int, int, int>(2, 2, 2, 0, 2, 0), -7000 },
             {new Tuple<int, int, int, int, int, int>(0, 2, 2, 2, 0, 2), -8000 },
             {new Tuple<int, int, int, int, int, int>(2, 2, 2, 2, 0, 0), -10000 },
-            {new Tuple<int, int, int, int, int, int>(0, 2, 2, 2, 2, 0), -20000 },
+            {new Tuple<int, int, int, int, int, int>(0, 2, 2, 2, 2, 0), -50000 },
             {new Tuple<int, int, int, int, int, int>(2, 2, 2, 2, 2, 0), int.MinValue },
 
             {new Tuple<int, int, int, int, int, int>(2, 1, 0, 1, 0, 0), 10 },
@@ -73,7 +73,7 @@ namespace GameTree
             {new Tuple<int, int, int, int, int, int>(2, 1, 1, 0, 1, 1), 5000 },
             {new Tuple<int, int, int, int, int, int>(2, 1, 0, 1, 1, 1), 5000 },
             {new Tuple<int, int, int, int, int, int>(2, 1, 1, 1, 0, 1), 6000 },
-            {new Tuple<int, int, int, int, int, int>(2, 0, 1, 1, 1, 1), 12000 },
+            {new Tuple<int, int, int, int, int, int>(2, 0, 1, 1, 1, 1), 15000 },
             {new Tuple<int, int, int, int, int, int>(2, 1, 1, 1, 1, 1), int.MaxValue },
 
             {new Tuple<int, int, int, int, int, int>(1, 2, 0, 2, 0, 0), -10 },
@@ -90,7 +90,7 @@ namespace GameTree
             {new Tuple<int, int, int, int, int, int>(1, 2, 2, 0, 2, 2), -5000 },
             {new Tuple<int, int, int, int, int, int>(1, 2, 0, 2, 2, 2), -5000 },
             {new Tuple<int, int, int, int, int, int>(1, 2, 2, 2, 0, 2), -6000 },
-            {new Tuple<int, int, int, int, int, int>(1, 0, 2, 2, 2, 2), -12000 },
+            {new Tuple<int, int, int, int, int, int>(1, 0, 2, 2, 2, 2), -15000 },
             {new Tuple<int, int, int, int, int, int>(1, 2, 2, 2, 2, 2), int.MinValue },
 
         };
